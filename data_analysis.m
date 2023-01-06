@@ -6,18 +6,18 @@ close all
 
 % Misson: read data and plot Temperature between thermocouples vs time;
 % Total energy collected in the water(also average power over that time);
-% Matimeimum heating power
+% Maximum heating power
 
 
 % automated program : the whole structure design 
-% 1.read data from the etimeperiment data file
+% 1.read data from the experiment data file
 % 2.plot Temperature between thermocouples vs time
 % 3.create a function that calculated energy collected and plot power vs t
 % 4.create a function that calculated the heating power.
 
 
 %% Main script
-%% 1: read data from the etimeperiment data file
+%% 1: read data from the experiment data file
 filename = 'ExpData.lvm';
 delimiterIn = '\t';
 headerlinesIn = 23;
