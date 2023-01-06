@@ -98,9 +98,8 @@ avPower = avEnergy/(max(time)-min(time));
 % At first, try to smooth data points : 1. weighted average algorithms
 %                                       2. signal filtering 
 % 1. weighted average algorithm (5 points):
+
 figure
 smooth_T1 = smooth(T_of_couple1);
-plot(time,T_of_couple1,color='r')
-hold on 
-plot(time,smooth_T1,color='black')
-legend('raw data','smoothed data')
+plot(time,T_of_couple1,'-o',time,smooth_T1,'-x')
+legend('Original data','smoothed data')
