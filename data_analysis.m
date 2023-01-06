@@ -17,7 +17,7 @@ close all
 
 
 %% Main script
-%% 1: read data from the experiment data file
+%% 1: read data from the experiment data file and delete useless data
 filename = 'ExpData.lvm';
 delimiterIn = '\t';
 headerlinesIn = 23;
@@ -28,6 +28,7 @@ T_of_couple1 = A.data(:,2);
 T_of_couple2 = A.data(:,4);
 T_of_couple3 = A.data(:,6);
 
+figure
 tiledlayout(3,1,"TileSpacing",'compact')
 %Top
 ax1 = nexttile;
@@ -61,6 +62,7 @@ heat_water = xlsread("Specific heat of water.xlsx",'A2:B41');
 %fit a line for specific heat of water
 
 % check the shape to choose degree of fitting curve
+figure
 plot(heat_water(:,1),heat_water(:,2))
 hold on
 % quadratic fitting
@@ -84,10 +86,21 @@ integral1 = m*heatofwater(T_of_couple1);
 integral2 = m*heatofwater(T_of_couple2);
 integral3 = m*heatofwater(T_of_couple3);
 % energy captured using temperature from 3 thermocouples
-E_couple1 = trapz(T_of_couple1,integral_fun);
-E_couple2 = trapz(T_of_couple2,integral_fun);
-E_couple3 = trapz(T_of_couple3,integral_fun);
+E_couple1 = trapz(T_of_couple1,integral1);
+E_couple2 = trapz(T_of_couple2,integral2);
+E_couple3 = trapz(T_of_couple3,integral3);
 % average energy captured
-avEnergy = (E_couple3+E_couple2+E_couple1)/3
+avEnergy = (E_couple3+E_couple2+E_couple1)/3;
 % average power
-avPower = avEnergy/(max(time)-min(time))
+avPower = avEnergy/(max(time)-min(time));
+
+%% 4. Calculating maximum heating power
+% At first, try to smooth data points : 1. weighted average algorithms
+%                                       2. signal filtering 
+% 1. weighted average algorithm (5 points):
+figure
+smooth_T1 = smooth(T_of_couple1);
+plot(time,T_of_couple1,color='r')
+hold on 
+plot(time,smooth_T1,color='black')
+legend('raw data','smoothed data')
