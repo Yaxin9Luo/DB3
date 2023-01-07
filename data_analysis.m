@@ -55,7 +55,7 @@ plot(time,T_of_couple3)
 legend('Thermocouple1','Thermocouple2','Thermocouple3',Location='northwest')
 title('Temperature vs Times')
 
-%% 3:Calculated energy captured and plot power vs t
+%% 3:Calculated energy captured and average power
 m = 0.3; % mass of water in kg
 heat_water = xlsread("Specific heat of water.xlsx",'A2:B41');
 
@@ -95,11 +95,32 @@ avEnergy = (E_couple3+E_couple2+E_couple1)/3;
 avPower = avEnergy/(max(time)-min(time));
 
 %% 4. Calculating maximum heating power
-% At first, try to smooth data points : 1. weighted average algorithms
-%                                       2. signal filtering 
-% 1. weighted average algorithm (5 points):
-
+% At first, try to smooth data points : weighted average algorithms
+%                                       
+% weighted average algorithm (use 5 points):
 figure
-smooth_T1 = smooth(T_of_couple1);
-plot(time,T_of_couple1,'-o',time,smooth_T1,'-x')
+smooth_T2 = smooth(T_of_couple2);
+smooth_T2(end-2:end) = 90;
+plot(time,T_of_couple2,'-o',time,smooth_T2,'-x')
 legend('Original data','smoothed data')
+
+% Calculating maximum heating power
+% use average T as variable of specific heat of water 
+spaces_time = transpose(time(1:5:end));
+left_shift_time = [spaces_time(2:end) spaces_time(1)];
+spaces_T2 = smooth_T2(1:5:end);
+left_shift_T2 = [spaces_T2(2:end) spaces_T2(1)] ;
+average_T2 = sum([spaces_T2;left_shift_T2])./2;
+dT = left_shift_T2-spaces_T2;
+dt = left_shift_time-spaces_time;
+
+Q0 = m*heatofwater(average_T2).*(dT./dt);
+Q = Q0(1:end-1);
+smoothQ=smooth(Q);
+figure
+plot(spaces_time(1:end-1),Q, spaces_time(1:end-1), smoothQ)
+axis([0 3000 0 120])
+title("Maximum Power with time")
+legend('original data', 'smoothed data')
+
+
