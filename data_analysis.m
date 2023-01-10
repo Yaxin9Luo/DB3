@@ -27,7 +27,7 @@ time = A.data(:,1);
 T_of_couple1 = A.data(:,2);
 T_of_couple2 = A.data(:,4);
 T_of_couple3 = A.data(:,6);
-
+Ambient_T = A.data(:,10);
 figure
 tiledlayout(3,1,"TileSpacing",'compact')
 %Top
@@ -38,12 +38,12 @@ legend('Thermocouple 1',Location='northwest')
 %Middle
 ax2 = nexttile;
 plot(ax2,time,T_of_couple2,Color='r')
-ylabel(ax2,'Temperature',FontSize=30)
+ylabel(ax2,'Temperature(C)',FontSize=30)
 legend('Thermocouple 2',Location='northwest')
 %Bottom
 ax3 = nexttile;
 plot(ax3,time,T_of_couple3,Color='b')
-xlabel(ax3,'Time',FontSize=30)
+xlabel(ax3,'Time(s)',FontSize=30)
 legend('Thermocouple 3',Location='northwest')
 
 %In a single figure
@@ -52,9 +52,11 @@ plot(time,T_of_couple1)
 hold on
 plot(time,T_of_couple2)
 plot(time,T_of_couple3)
-legend('Thermocouple1','Thermocouple2','Thermocouple3',Location='northwest')
-title('Temperature vs Times')
-
+plot(time,Ambient_T)
+legend('Thermocouple1','Thermocouple2','Thermocouple3','Ambient',Location='northwest',fontsize=15)
+title('Temperature vs Times',FontSize=18)
+xlabel('Time(s)')
+ylabel('Temperature(C)')
 %% 3:Calculated energy captured and average power
 m = 0.3; % mass of water in kg
 heat_water = xlsread("Specific heat of water.xlsx",'A2:B41');
@@ -72,6 +74,10 @@ xFit = linspace(min(heat_water(:,1)), max(heat_water(:,1)), 1000);
 yFit = polyval(coefficients , xFit);
 % compare fitting curve with real specific heat of water data 
 plot(xFit, yFit) 
+legend('real value points','fit curve',Location='northwest',fontsize=18)
+title('Specific heat of water vs Temperature',FontSize=20)
+xlabel('Temperature(C)')
+ylabel('Specific heat of water(J/(kg C)')
 format long
 display(['Equation is heat_water = ' num2str(coefficients(1)) '*T^6 +' num2str(coefficients(2)) ...
     '*T^5 +' num2str(coefficients(3)) '*T^4 +' num2str(coefficients(4)) '*T^3 +' ...
@@ -102,8 +108,10 @@ figure
 smooth_T2 = smooth(T_of_couple2);
 smooth_T2(end-2:end) = 90;
 plot(time,T_of_couple2,'-o',time,smooth_T2,'-x')
-legend('Original data','smoothed data')
-
+legend('Original data','smoothed data',fontsize=18)
+title('Temperature of time',FontSize=20)
+xlabel('Time(s)')
+ylabel('Temperature(C)')
 % Calculating maximum heating power
 % use average T as variable of specific heat of water 
 spaces_time = transpose(time(1:5:end));
@@ -120,7 +128,17 @@ smoothQ=smooth(Q);
 figure
 plot(spaces_time(1:end-1),Q, spaces_time(1:end-1), smoothQ)
 axis([0 3000 0 120])
-title("Maximum Power with time")
-legend('original data', 'smoothed data')
-
-
+title("Maximum Power with time",FontSize=20)
+legend('original data', 'smoothed data',fontsize=18)
+xlabel('Time (s)')
+ylabel('Power (W)')
+%% 5 Plot the power vs (T_water – T_room)
+figure
+spaces_ambient = transpose(Ambient_T(1:5:end));
+difference_T = spaces_T2-spaces_ambient;
+plot(difference_T(1:end-1),smoothQ)
+axis([0 70 0 120])
+title("power vs T(difference)",FontSize=20)
+xlabel('Temperature difference(C)')
+ylabel('Power (W)')
+%% 6 Fit a line to Power vs (T_water – T_room) curve
