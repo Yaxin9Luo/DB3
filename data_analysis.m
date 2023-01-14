@@ -1,13 +1,8 @@
 %% problem description and initialization 
 
-clear all
-clc
-close all
-
 % Misson: read data and plot Temperature between thermocouples vs time;
 % Total energy collected in the water(also average power over that time);
 % Maximum heating power
-
 
 % automated program : the whole structure design 
 % 1.read data from the experiment data file
@@ -18,16 +13,19 @@ close all
 
 %% Main script
 %% 1: read data from the experiment data file and delete useless data
-filename = 'ExpData.lvm';
-delimiterIn = '\t';
-headerlinesIn = 23;
+filename = 'exp2.txt';
+
+delimiterIn = ' ';
+headerlinesIn = 0;
 A = importdata(filename,delimiterIn,headerlinesIn);
+B = importdata('ExpData.lvm','\t',23);
 %% 2: plot Temperature between thermocouples vs time
-time = A.data(:,1);
-T_of_couple1 = A.data(:,2);
-T_of_couple2 = A.data(:,4);
-T_of_couple3 = A.data(:,6);
-Ambient_T = A.data(:,10);
+time = transpose(linspace(0,4955,49550));
+T_of_couple1 = 10*A.data(:,1);
+T_of_couple2 = 10*A.data(:,2);
+T_of_couple3 = 10*A.data(:,3);
+Ambient_T =[ B.data(1:12788,10);B.data(:,10) ;B.data(:,10)];
+%%
 figure
 tiledlayout(3,1,"TileSpacing",'compact')
 %Top
@@ -58,7 +56,7 @@ title('Temperature vs Times',FontSize=18)
 xlabel('Time(s)')
 ylabel('Temperature(C)')
 %% 3:Calculated energy captured and average power
-m = 0.3; % mass of water in kg
+m = 0.175; % mass of water in kg
 heat_water = xlsread("Specific heat of water.xlsx",'A2:B41');
 
 %fit a line for specific heat of water
@@ -99,7 +97,7 @@ E_couple3 = trapz(T_of_couple3,integral3);
 avEnergy = (E_couple3+E_couple2+E_couple1)/3;
 % average power
 avPower = avEnergy/(max(time)-min(time));
-
+display(['average energy = ' num2str(avEnergy) ' and average power = ' num2str(avPower)])
 %% 4. Calculating maximum heating power
 % At first, try to smooth data points : weighted average algorithms
 %                                       
@@ -127,7 +125,7 @@ Q = Q0(1:end-1);
 smoothQ=smooth(Q);
 figure
 plot(spaces_time(1:end-1),Q, spaces_time(1:end-1), smoothQ)
-axis([0 3000 0 120])
+axis([0 1200 0 80])
 title("Maximum Power with time",FontSize=20)
 legend('original data', 'smoothed data',fontsize=18)
 xlabel('Time (s)')
@@ -137,8 +135,21 @@ figure
 spaces_ambient = transpose(Ambient_T(1:5:end));
 difference_T = spaces_T2-spaces_ambient;
 plot(difference_T(1:end-1),smoothQ)
-axis([0 70 0 120])
+axis([0 35 0 30])
 title("power vs T(difference)",FontSize=20)
 xlabel('Temperature difference(C)')
 ylabel('Power (W)')
 %% 6 Fit a line to Power vs (T_water – T_room) curve
+% quadratic fitting
+coefficients2 = polyfit(difference_T(1:end-1),smoothQ,2); 
+% Create a new x axis with exactly 1000 points.
+xFit2 = linspace(min(difference_T), max(difference_T), 1000); 
+yFit2 = polyval(coefficients2 , xFit2);
+figure
+plot(xFit2, yFit2)
+title('Power vs Temperature diff',FontSize=20)
+xlabel('Temperature(C)')
+ylabel('Power')
+format long
+display(['Power = ' num2str(coefficients(1)) '*diffT^2 +' num2str(coefficients(2)) ...
+    '*T +' num2str(coefficients(3))])
