@@ -13,18 +13,20 @@
 
 %% Main script
 %% 1: read data from the experiment data file and delete useless data
-filename = 'exp2.txt';
+filename = 'Testgroup4.txt';
 
 delimiterIn = ' ';
 headerlinesIn = 0;
 A = importdata(filename,delimiterIn,headerlinesIn);
 B = importdata('ExpData.lvm','\t',23);
 %% 2: plot Temperature between thermocouples vs time
-time = transpose(linspace(0,4955,49550));
-T_of_couple1 = 10*A.data(:,1);
-T_of_couple2 = 10*A.data(:,2);
-T_of_couple3 = 10*A.data(:,3);
-Ambient_T =[ B.data(1:12788,10);B.data(:,10) ;B.data(:,10)];
+time = transpose(linspace(0,99,990));
+%time = transpose(linspace(0,4955,49550));
+T_of_couple1 = 10*A.data(:,2);
+T_of_couple2 = 10*A.data(:,3);
+T_of_couple3 = 10*A.data(:,4);
+Ambient_T = 10*A.data(:,1);
+%Ambient_T =[ B.data(1:12788,10);B.data(:,10) ;B.data(:,10)];
 %%
 figure
 tiledlayout(3,1,"TileSpacing",'compact')
@@ -125,7 +127,7 @@ Q = Q0(1:end-1);
 smoothQ=smooth(Q);
 figure
 plot(spaces_time(1:end-1),Q, spaces_time(1:end-1), smoothQ)
-axis([0 1200 0 80])
+axis([0 100 0 500])
 title("Maximum Power with time",FontSize=20)
 legend('original data', 'smoothed data',fontsize=18)
 xlabel('Time (s)')
@@ -135,21 +137,23 @@ figure
 spaces_ambient = transpose(Ambient_T(1:5:end));
 difference_T = spaces_T2-spaces_ambient;
 plot(difference_T(1:end-1),smoothQ)
-axis([0 35 0 30])
-title("power vs T(difference)",FontSize=20)
+%axis([0 35 0 30])
+title("power vs Temperature difference)",FontSize=20)
 xlabel('Temperature difference(C)')
 ylabel('Power (W)')
 %% 6 Fit a line to Power vs (T_water – T_room) curve
 % quadratic fitting
-coefficients2 = polyfit(difference_T(1:end-1),smoothQ,2); 
+coefficients2 = polyfit(difference_T(4:end-1),smoothQ(4:end),4); 
 % Create a new x axis with exactly 1000 points.
-xFit2 = linspace(min(difference_T), max(difference_T), 1000); 
+xFit2 = linspace(min(difference_T(4:end-1)), max(difference_T(4:end-1)), 1000); 
 yFit2 = polyval(coefficients2 , xFit2);
 figure
 plot(xFit2, yFit2)
-title('Power vs Temperature diff',FontSize=20)
-xlabel('Temperature(C)')
+title('Fitting curve for Power vs Temperature diff',FontSize=20)
+xlabel('Temperature difference(C)')
 ylabel('Power')
 format long
-display(['Power = ' num2str(coefficients(1)) '*diffT^2 +' num2str(coefficients(2)) ...
-    '*T +' num2str(coefficients(3))])
+display(coefficients2)
+display(['Power = ' num2str(coefficients2(1)) '*T^4 +' num2str(coefficients2(2)) ...
+    '*T^3 +' num2str(coefficients2(3)) '*T^2 +' num2str(coefficients2(4)) '*T^1 +'...
+    num2str(coefficients2(5)) ])
